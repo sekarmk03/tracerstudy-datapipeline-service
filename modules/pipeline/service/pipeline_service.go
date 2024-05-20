@@ -23,7 +23,7 @@ type PipelineService struct {
 
 type PipelineServiceUseCase interface {
 	KabKotaPipeline(ctx context.Context) (uint64, error)
-	ProvinsiPipeline(ctx context.Context) error
+	ProvinsiPipeline(ctx context.Context) (uint64, error)
 	ProdiPipeline(ctx context.Context) (uint64, error)
 	UserStudyPipeline(ctx context.Context) error
 	SiakUpdateRespondenPipeline(ctx context.Context) error
@@ -78,10 +78,10 @@ func (p *PipelineService) KabKotaPipeline(ctx context.Context) (uint64, error) {
 	return count, nil
 }
 
-func (p *PipelineService) ProvinsiPipeline(ctx context.Context) error {
+func (p *PipelineService) ProvinsiPipeline(ctx context.Context) (uint64, error) {
 	provinsi, err := p.provinsiRepository.FindAll(ctx)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	var newProvinsi []*entity.NewProvinsi
@@ -94,11 +94,12 @@ func (p *PipelineService) ProvinsiPipeline(ctx context.Context) error {
 		})
 	}
 
-	if err := p.provinsiRepository.BulkInsert(ctx, newProvinsi); err != nil {
-		return err
+	rows, err := p.provinsiRepository.BulkInsert(ctx, newProvinsi)
+	if err != nil {
+		return 0, err
 	}
 
-	return nil
+	return rows, nil
 }
 
 func (p *PipelineService) ProdiPipeline(ctx context.Context) (uint64, error) {

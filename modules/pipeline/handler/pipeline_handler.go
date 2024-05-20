@@ -47,7 +47,7 @@ func (ph *PipelineHandler) KabKotaPipeline(ctx context.Context, req *emptypb.Emp
 }
 
 func (ph *PipelineHandler) ProvinsiPipeline(ctx context.Context, req *emptypb.Empty) (*pb.PipelineServiceResponse, error) {
-	err := ph.pipelineSvc.ProvinsiPipeline(ctx)
+	rows, err := ph.pipelineSvc.ProvinsiPipeline(ctx)
 	if err != nil {
 		parseError := errors.ParseError(err)
 		log.Println("ERROR: [PipelineHandler - ProvinsiPipeline] Error while run Provinsi pipeline: ", parseError.Message)
@@ -55,12 +55,14 @@ func (ph *PipelineHandler) ProvinsiPipeline(ctx context.Context, req *emptypb.Em
 		return &pb.PipelineServiceResponse{
 			Code:    uint32(http.StatusInternalServerError),
 			Message: parseError.Message,
+			Rows: 0,
 		}, status.Errorf(parseError.Code, parseError.Message)
 	}
 
 	return &pb.PipelineServiceResponse{
 		Code:    uint32(http.StatusOK),
 		Message: "Pipeline for Provinsi has been successfully executed",
+		Rows: rows,
 	}, nil
 }
 
