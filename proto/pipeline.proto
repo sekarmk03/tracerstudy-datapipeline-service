@@ -6,7 +6,7 @@ option go_package = "./;pb";
 import "google/protobuf/empty.proto";
 
 message PipelineServiceResponse {
-    string code = 1;
+    uint32 code = 1;
     string message = 2;
 }
 

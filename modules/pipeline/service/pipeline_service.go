@@ -15,9 +15,9 @@ type PipelineService struct {
 	kabKotaRepository   repository.KabKotaRepositoryUseCase
 	provinsiRepository  repository.ProvinsiRepositoryUseCase
 	prodiRepository     repository.ProdiRepositoryUseCase
+	userStudyRepository repository.UserStudyRepositoryUseCase
 	mhsBiodataService   MhsBiodataServiceUseCase
 	respondenRepository repository.RespondenRepositoryUseCase
-	userStudyRepository repository.UserStudyRepositoryUseCase
 	pktsRepository      repository.PktsRepositoryUseCase
 }
 
@@ -25,11 +25,10 @@ type PipelineServiceUseCase interface {
 	KabKotaPipeline(ctx context.Context) error
 	ProvinsiPipeline(ctx context.Context) error
 	ProdiPipeline(ctx context.Context) error
-	FakultasPipeline(ctx context.Context) error
+	UserStudyPipeline(ctx context.Context) error
 	SiakUpdateRespondenPipeline(ctx context.Context) error
 	RespondenPipeline(ctx context.Context) error
-	UserStudyPipeline(ctx context.Context) error
-	PktsPipeline(ctx context.Context) error
+	PKTSPipeline(ctx context.Context) error
 }
 
 func NewPipelineService(
@@ -47,9 +46,9 @@ func NewPipelineService(
 		kabKotaRepository:   kabKotaRepo,
 		provinsiRepository:  provinsiRepo,
 		prodiRepository:     prodiRepo,
+		userStudyRepository: userStudyRepo,
 		mhsBiodataService:   mhsBiodataSvc,
 		respondenRepository: respondenRepo,
-		userStudyRepository: userStudyRepo,
 		pktsRepository:      pktsRepo,
 	}
 }
@@ -265,7 +264,7 @@ func (p *PipelineService) UserStudyPipeline(ctx context.Context) error {
 	return nil
 }
 
-func (p *PipelineService) PktsPipeline(ctx context.Context) error {
+func (p *PipelineService) PKTSPipeline(ctx context.Context) error {
 	pkts, err := p.pktsRepository.FindAll(ctx)
 	if err != nil {
 		return err

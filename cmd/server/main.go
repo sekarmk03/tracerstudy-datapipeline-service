@@ -2,21 +2,14 @@ package main
 
 import (
 	"fmt"
-	"tracerstudy-tracer-service/common/config"
+	"tracerstudy-datapipeline-service/common/config"
 
-	gormConn "tracerstudy-tracer-service/common/gorm"
-	commonJwt "tracerstudy-tracer-service/common/jwt"
-	"tracerstudy-tracer-service/common/mysql"
-	"tracerstudy-tracer-service/server"
+	gormConn "tracerstudy-datapipeline-service/common/gorm"
+	commonJwt "tracerstudy-datapipeline-service/common/jwt"
+	"tracerstudy-datapipeline-service/common/mysql"
+	"tracerstudy-datapipeline-service/server"
 
-	fakultasModule "tracerstudy-tracer-service/modules/fakultas"
-	kabkotaModule "tracerstudy-tracer-service/modules/kabkota"
-	mhsbiodataapiModule "tracerstudy-tracer-service/modules/mhsbiodataapi"
-	pktsModule "tracerstudy-tracer-service/modules/pkts"
-	prodiModule "tracerstudy-tracer-service/modules/prodi"
-	provinsiModule "tracerstudy-tracer-service/modules/provinsi"
-	respondenModule "tracerstudy-tracer-service/modules/responden"
-	userstudyModule "tracerstudy-tracer-service/modules/userstudy"
+	pipelineModule "tracerstudy-datapipeline-service/modules/pipeline"
 
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
@@ -50,15 +43,8 @@ func main() {
 	_ = grpcServer.AwaitTermination()
 }
 
-func registerGrpcHandlers(server *grpc.Server, cfg config.Config, db *gorm.DB /*jwtManager *commonJwt.JWT,*/, grpcConn *grpc.ClientConn) {
-	prodiModule.InitGrpc(server, cfg, db, grpcConn)
-	provinsiModule.InitGrpc(server, cfg, db, grpcConn)
-	kabkotaModule.InitGrpc(server, cfg, db, grpcConn)
-	mhsbiodataapiModule.InitGrpc(server, cfg, db, grpcConn)
-	respondenModule.InitGrpc(server, cfg, db, grpcConn)
-	pktsModule.InitGrpc(server, cfg, db, grpcConn)
-	userstudyModule.InitGrpc(server, cfg, db, grpcConn)
-	fakultasModule.InitGrpc(server, cfg, db, grpcConn)
+func registerGrpcHandlers(server *grpc.Server, cfg config.Config, db *gorm.DB, grpcConn *grpc.ClientConn) {
+	pipelineModule.InitGrpc(server, cfg, db, grpcConn)
 }
 
 // func createRestServer(port string) *server.Rest {
