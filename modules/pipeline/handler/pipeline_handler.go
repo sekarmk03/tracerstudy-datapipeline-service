@@ -35,14 +35,14 @@ func (ph *PipelineHandler) KabKotaPipeline(ctx context.Context, req *emptypb.Emp
 		return &pb.PipelineServiceResponse{
 			Code:    uint32(http.StatusInternalServerError),
 			Message: parseError.Message,
-			Rows: 0,
+			Rows:    0,
 		}, status.Errorf(parseError.Code, parseError.Message)
 	}
 
 	return &pb.PipelineServiceResponse{
 		Code:    uint32(http.StatusOK),
 		Message: "Pipeline for KabKota has been successfully executed",
-		Rows: rows,
+		Rows:    rows,
 	}, nil
 }
 
@@ -55,14 +55,14 @@ func (ph *PipelineHandler) ProvinsiPipeline(ctx context.Context, req *emptypb.Em
 		return &pb.PipelineServiceResponse{
 			Code:    uint32(http.StatusInternalServerError),
 			Message: parseError.Message,
-			Rows: 0,
+			Rows:    0,
 		}, status.Errorf(parseError.Code, parseError.Message)
 	}
 
 	return &pb.PipelineServiceResponse{
 		Code:    uint32(http.StatusOK),
 		Message: "Pipeline for Provinsi has been successfully executed",
-		Rows: rows,
+		Rows:    rows,
 	}, nil
 }
 
@@ -75,14 +75,14 @@ func (ph *PipelineHandler) ProdiPipeline(ctx context.Context, req *emptypb.Empty
 		return &pb.PipelineServiceResponse{
 			Code:    uint32(http.StatusInternalServerError),
 			Message: parseError.Message,
-			Rows: 0,
+			Rows:    0,
 		}, status.Errorf(parseError.Code, parseError.Message)
 	}
 
 	return &pb.PipelineServiceResponse{
 		Code:    uint32(http.StatusOK),
 		Message: "Pipeline for Prodi has been successfully executed",
-		Rows: rows,
+		Rows:    rows,
 	}, nil
 }
 
@@ -95,19 +95,19 @@ func (ph *PipelineHandler) UserStudyPipeline(ctx context.Context, req *emptypb.E
 		return &pb.PipelineServiceResponse{
 			Code:    uint32(http.StatusInternalServerError),
 			Message: parseError.Message,
-			Rows: 0,
+			Rows:    0,
 		}, status.Errorf(parseError.Code, parseError.Message)
 	}
 
 	return &pb.PipelineServiceResponse{
 		Code:    uint32(http.StatusOK),
 		Message: "Pipeline for User Study has been successfully executed",
-		Rows: rows,
+		Rows:    rows,
 	}, nil
 }
 
 func (ph *PipelineHandler) SiakUpdateRespondenPipeline(ctx context.Context, req *emptypb.Empty) (*pb.PipelineServiceResponse, error) {
-	err := ph.pipelineSvc.SiakUpdateRespondenPipeline(ctx)
+	rows, err := ph.pipelineSvc.SiakUpdateRespondenPipeline(ctx)
 	if err != nil {
 		parseError := errors.ParseError(err)
 		log.Println("ERROR: [PipelineHandler - SiakUpdateRespondenPipeline] Error while update Responden data from Siak API: ", parseError.Message)
@@ -115,12 +115,14 @@ func (ph *PipelineHandler) SiakUpdateRespondenPipeline(ctx context.Context, req 
 		return &pb.PipelineServiceResponse{
 			Code:    uint32(http.StatusInternalServerError),
 			Message: parseError.Message,
+			Rows:    0,
 		}, status.Errorf(parseError.Code, parseError.Message)
 	}
 
 	return &pb.PipelineServiceResponse{
 		Code:    uint32(http.StatusOK),
 		Message: "Pipeline for Siak Update Responden has been successfully executed by 500 rows per batch",
+		Rows:    rows,
 	}, nil
 }
 
@@ -133,14 +135,14 @@ func (ph *PipelineHandler) RespondenPipeline(ctx context.Context, req *emptypb.E
 		return &pb.PipelineServiceResponse{
 			Code:    uint32(http.StatusInternalServerError),
 			Message: parseError.Message,
-			Rows: 0,
+			Rows:    0,
 		}, status.Errorf(parseError.Code, parseError.Message)
 	}
 
 	return &pb.PipelineServiceResponse{
 		Code:    uint32(http.StatusOK),
 		Message: "Pipeline for Responden has been successfully executed",
-		Rows: rows,
+		Rows:    rows,
 	}, nil
 }
 
@@ -153,13 +155,13 @@ func (ph *PipelineHandler) PKTSPipeline(ctx context.Context, req *emptypb.Empty)
 		return &pb.PipelineServiceResponse{
 			Code:    uint32(http.StatusInternalServerError),
 			Message: parseError.Message,
-			Rows: 0,
+			Rows:    0,
 		}, status.Errorf(parseError.Code, parseError.Message)
 	}
 
 	return &pb.PipelineServiceResponse{
 		Code:    uint32(http.StatusOK),
 		Message: "Pipeline for PKTS has been successfully executed by 500 rows per batch",
-		Rows: rows,
+		Rows:    rows,
 	}, nil
 }

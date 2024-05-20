@@ -26,7 +26,7 @@ type PipelineServiceUseCase interface {
 	ProvinsiPipeline(ctx context.Context) (uint64, error)
 	ProdiPipeline(ctx context.Context) (uint64, error)
 	UserStudyPipeline(ctx context.Context) (uint64, error)
-	SiakUpdateRespondenPipeline(ctx context.Context) error
+	SiakUpdateRespondenPipeline(ctx context.Context) (uint64, error)
 	RespondenPipeline(ctx context.Context) (uint64, error)
 	PKTSPipeline(ctx context.Context) (uint64, error)
 }
@@ -132,7 +132,7 @@ func (p *PipelineService) ProdiPipeline(ctx context.Context) (uint64, error) {
 	return rows, nil
 }
 
-func (p *PipelineService) SiakUpdateRespondenPipeline(ctx context.Context) error {
+func (p *PipelineService) SiakUpdateRespondenPipeline(ctx context.Context) (uint64, error) {
 	// err := p.respondenRepository.UpdateStatusUpdate(ctx, "1", "2")
 	// if err != nil {
 	// 	log.Println("ERROR: [PipelineService - SiakUpdateRespondenPipeline] Error while update status update:", err)
@@ -142,12 +142,15 @@ func (p *PipelineService) SiakUpdateRespondenPipeline(ctx context.Context) error
 	responden, err := p.respondenRepository.FindUnupdated(ctx)
 	if err != nil {
 		log.Println("ERROR: [PipelineService - SiakUpdateRespondenPipeline] Error while get unupdated responden data:", err)
-		return err
+		return 0, err
 	}
+
+	count := uint64(len(responden))
 
 	for _, rs := range responden {
 		mhs, err := p.mhsBiodataService.FetchMhsBiodataByNimFromSiakApi(rs.Nim)
 		if err != nil {
+			count--
 			log.Println("ERROR: [PipelineService - SiakUpdateRespondenPipeline] Error while fetch mhs biodata from siak:", err)
 			continue
 		}
@@ -180,6 +183,7 @@ func (p *PipelineService) SiakUpdateRespondenPipeline(ctx context.Context) error
 		}
 
 		if err := p.respondenRepository.Update(ctx, rs.Nim, rs, updateMap); err != nil {
+			count--
 			log.Println("ERROR: [PipelineService - SiakUpdateRespondenPipeline] Error while update responden data:", err)
 			continue
 		}
@@ -187,7 +191,7 @@ func (p *PipelineService) SiakUpdateRespondenPipeline(ctx context.Context) error
 		log.Println("INFO: [PipelineService - SiakUpdateRespondenPipeline] Update responden data success")
 	}
 
-	return nil
+	return count, nil
 }
 
 func (p *PipelineService) RespondenPipeline(ctx context.Context) (uint64, error) {
