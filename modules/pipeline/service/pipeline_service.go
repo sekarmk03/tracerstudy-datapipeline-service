@@ -24,7 +24,7 @@ type PipelineService struct {
 type PipelineServiceUseCase interface {
 	KabKotaPipeline(ctx context.Context) (uint64, error)
 	ProvinsiPipeline(ctx context.Context) error
-	ProdiPipeline(ctx context.Context) error
+	ProdiPipeline(ctx context.Context) (uint64, error)
 	UserStudyPipeline(ctx context.Context) error
 	SiakUpdateRespondenPipeline(ctx context.Context) error
 	RespondenPipeline(ctx context.Context) error
@@ -101,10 +101,10 @@ func (p *PipelineService) ProvinsiPipeline(ctx context.Context) error {
 	return nil
 }
 
-func (p *PipelineService) ProdiPipeline(ctx context.Context) error {
+func (p *PipelineService) ProdiPipeline(ctx context.Context) (uint64, error) {
 	prodi, err := p.prodiRepository.FindAll(ctx)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	var newProdi []*entity.NewProdi
@@ -123,11 +123,12 @@ func (p *PipelineService) ProdiPipeline(ctx context.Context) error {
 		})
 	}
 
-	if err := p.prodiRepository.BulkInsert(ctx, newProdi); err != nil {
-		return err
+	rows, err := p.prodiRepository.BulkInsert(ctx, newProdi)
+	if err != nil {
+		return 0, err
 	}
 
-	return nil
+	return rows, nil
 }
 
 func (p *PipelineService) SiakUpdateRespondenPipeline(ctx context.Context) error {

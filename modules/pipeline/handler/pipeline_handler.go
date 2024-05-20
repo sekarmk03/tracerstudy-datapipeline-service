@@ -65,7 +65,7 @@ func (ph *PipelineHandler) ProvinsiPipeline(ctx context.Context, req *emptypb.Em
 }
 
 func (ph *PipelineHandler) ProdiPipeline(ctx context.Context, req *emptypb.Empty) (*pb.PipelineServiceResponse, error) {
-	err := ph.pipelineSvc.ProdiPipeline(ctx)
+	rows, err := ph.pipelineSvc.ProdiPipeline(ctx)
 	if err != nil {
 		parseError := errors.ParseError(err)
 		log.Println("ERROR: [PipelineHandler - ProdiPipeline] Error while run Prodi pipeline: ", parseError.Message)
@@ -73,12 +73,14 @@ func (ph *PipelineHandler) ProdiPipeline(ctx context.Context, req *emptypb.Empty
 		return &pb.PipelineServiceResponse{
 			Code:    uint32(http.StatusInternalServerError),
 			Message: parseError.Message,
+			Rows: 0,
 		}, status.Errorf(parseError.Code, parseError.Message)
 	}
 
 	return &pb.PipelineServiceResponse{
 		Code:    uint32(http.StatusOK),
 		Message: "Pipeline for Prodi has been successfully executed",
+		Rows: rows,
 	}, nil
 }
 

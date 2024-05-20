@@ -24,7 +24,7 @@ func NewProdiRepository(db1, db2 *gorm.DB) *ProdiRepository {
 
 type ProdiRepositoryUseCase interface {
 	FindAll(ctx context.Context) ([]*entity.OldProdi, error)
-	BulkInsert(ctx context.Context, prodi []*entity.NewProdi) error
+	BulkInsert(ctx context.Context, prodi []*entity.NewProdi) (uint64, error)
 }
 
 func (p *ProdiRepository) FindAll(ctx context.Context) ([]*entity.OldProdi, error) {
@@ -40,32 +40,35 @@ func (p *ProdiRepository) FindAll(ctx context.Context) ([]*entity.OldProdi, erro
 	return prodi, nil
 }
 
-func (p *ProdiRepository) BulkInsert(ctx context.Context, prodi []*entity.NewProdi) error {
+func (p *ProdiRepository) BulkInsert(ctx context.Context, prodi []*entity.NewProdi) (uint64, error) {
 	ctxSpan, span := trace.StartSpan(ctx, "ProdiRepository - BulkInsert")
 	defer span.End()
 
 	tx := p.db2.Begin()
 	if err := tx.Error; err != nil {
 		log.Println("ERROR: [ProdiRepository - BulkInsert] Failed to start transaction:", err)
-		return err
+		return 0, err
 	}
+
+	count := uint64(len(prodi))
 
 	for _, p := range prodi {
 		if err := tx.Debug().WithContext(ctxSpan).Create(p).Error; err != nil {
+			count--
 			if gormErr := err.(*mysql.MySQLError); gormErr.Number == 1062 {
 				log.Printf("INFO: [ProdiRepository - BulkInsert] Duplicate entry for kode: %s, skipping this entry\n", p.Kode)
 				continue
 			}
 			tx.Rollback()
 			log.Println("ERROR: [ProdiRepository - BulkInsert] Failed to insert Prodi data:", err)
-			return err
+			return 0, err
 		}
 	}
 
 	if err := tx.Commit().Error; err != nil {
 		log.Println("ERROR: [ProdiRepository - BulkInsert] Failed to commit transaction:", err)
-		return err
+		return 0, err
 	}
 
-	return nil
+	return count, nil
 }
