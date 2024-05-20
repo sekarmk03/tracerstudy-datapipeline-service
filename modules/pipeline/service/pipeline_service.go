@@ -22,7 +22,7 @@ type PipelineService struct {
 }
 
 type PipelineServiceUseCase interface {
-	KabKotaPipeline(ctx context.Context) error
+	KabKotaPipeline(ctx context.Context) (uint64, error)
 	ProvinsiPipeline(ctx context.Context) error
 	ProdiPipeline(ctx context.Context) error
 	UserStudyPipeline(ctx context.Context) error
@@ -53,28 +53,29 @@ func NewPipelineService(
 	}
 }
 
-func (p *PipelineService) KabKotaPipeline(ctx context.Context) error {
+func (p *PipelineService) KabKotaPipeline(ctx context.Context) (uint64, error) {
 	kabkota, err := p.kabKotaRepository.FindAll(ctx)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	var newKabKota []*entity.NewKabkota
 	for _, kk := range kabkota {
 		newKabKota = append(newKabKota, &entity.NewKabkota{
 			IdWil:      kk.IdWil,
-			Nama:       kk.Nama,
+			Nama:       kk.NmWil,
 			IdIndukWil: kk.IdIndukWilayah,
 			CreatedAt:  kk.CreatedAt,
 			UpdatedAt:  kk.UpdatedAt,
 		})
 	}
 
-	if err := p.kabKotaRepository.BulkInsert(ctx, newKabKota); err != nil {
-		return err
+	count, err := p.kabKotaRepository.BulkInsert(ctx, newKabKota)
+	if err != nil {
+		return 0, err
 	}
 
-	return nil
+	return count, nil
 }
 
 func (p *PipelineService) ProvinsiPipeline(ctx context.Context) error {
@@ -87,7 +88,7 @@ func (p *PipelineService) ProvinsiPipeline(ctx context.Context) error {
 	for _, pr := range provinsi {
 		newProvinsi = append(newProvinsi, &entity.NewProvinsi{
 			IdWil:     pr.IdWil,
-			Nama:      pr.Nama,
+			Nama:      pr.NmWil,
 			CreatedAt: pr.CreatedAt,
 			UpdatedAt: pr.UpdatedAt,
 		})
@@ -130,6 +131,12 @@ func (p *PipelineService) ProdiPipeline(ctx context.Context) error {
 }
 
 func (p *PipelineService) SiakUpdateRespondenPipeline(ctx context.Context) error {
+	// err := p.respondenRepository.UpdateStatusUpdate(ctx, "1", "2")
+	// if err != nil {
+	// 	log.Println("ERROR: [PipelineService - SiakUpdateRespondenPipeline] Error while update status update:", err)
+	// 	return err
+	// }
+
 	responden, err := p.respondenRepository.FindUnupdated(ctx)
 	if err != nil {
 		log.Println("ERROR: [PipelineService - SiakUpdateRespondenPipeline] Error while get unupdated responden data:", err)
@@ -144,8 +151,9 @@ func (p *PipelineService) SiakUpdateRespondenPipeline(ctx context.Context) error
 		}
 
 		updateMap := map[string]interface{}{
-			"updated_at":    time.Now(),
-			"status_update": "1",
+			"updated_at": time.Now(),
+			// "status_update": "1",
+			"status_update": "0",
 			"ipk":           mhs.IPK,
 			"kodedikti":     mhs.KODEPSTD,
 			"jenjang":       mhs.JENJANG,
@@ -158,7 +166,7 @@ func (p *PipelineService) SiakUpdateRespondenPipeline(ctx context.Context) error
 			"thnmasuk":      mhs.THNMASUK,
 			"lamastd":       mhs.LAMASTD,
 			"tgl_sidang":    mhs.TGLSIDANG,
-			"jenis_kelamin": mhs.KODEJK,
+			"jk":            mhs.KODEJK,
 		}
 
 		if mhs.KODEPST != "" && len(mhs.KODEPST) >= 4 {

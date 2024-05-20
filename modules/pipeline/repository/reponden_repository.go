@@ -25,6 +25,7 @@ func NewRespondenRepository(db1, db2 *gorm.DB) *RespondenRepository {
 type RespondenRepositoryUseCase interface {
 	FindUnupdated(ctx context.Context) ([]*entity.OldResponden, error)
 	Update(ctx context.Context, nim string, responden *entity.OldResponden, updatedFields map[string]interface{}) error
+	UpdateStatusUpdate(ctx context.Context, statusFrom, statusTo string) error
 	FindAll(ctx context.Context) ([]*entity.OldResponden, error)
 	BulkInsert(ctx context.Context, responden []*entity.NewResponden) error
 }
@@ -34,7 +35,7 @@ func (r *RespondenRepository) FindUnupdated(ctx context.Context) ([]*entity.OldR
 	defer span.End()
 
 	var responden []*entity.OldResponden
-	if err := r.db1.Debug().WithContext(ctxSpan).Where("status_update = ?", "0").Limit(500).Find(&responden).Error; err != nil {
+	if err := r.db1.Debug().WithContext(ctxSpan).Where("thnmasuk IS NULL OR lamastd IS NULL").Limit(500).Find(&responden).Error; err != nil {
 		log.Println("ERROR: [RespondenRepository - FindUnupdated] Internal server error:", err)
 		return nil, err
 	}
@@ -48,6 +49,18 @@ func (r *RespondenRepository) Update(ctx context.Context, nim string, responden 
 
 	if err := r.db1.Debug().WithContext(ctxSpan).Model(&responden).Where("nim = ?", nim).Updates(updatedFields).Error; err != nil {
 		log.Println("ERROR: [RespondenRepository - Update] Internal server error:", err)
+		return err
+	}
+
+	return nil
+}
+
+func (r *RespondenRepository) UpdateStatusUpdate(ctx context.Context, statusFrom, statusTo string) error {
+	ctxSpan, span := trace.StartSpan(ctx, "RespondenRepository - UpdateStatusUpdate")
+	defer span.End()
+
+	if err := r.db1.Debug().WithContext(ctxSpan).Model(&entity.OldResponden{}).Where("status_update = ?", statusFrom).Update("status_update", statusTo).Error; err != nil {
+		log.Println("ERROR: [RespondenRepository - UpdateStatusUpdate] Internal server error:", err)
 		return err
 	}
 

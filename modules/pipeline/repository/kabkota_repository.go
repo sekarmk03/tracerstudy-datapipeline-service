@@ -24,7 +24,7 @@ func NewKabKotaRepository(db1, db2 *gorm.DB) *KabKotaRepository {
 
 type KabKotaRepositoryUseCase interface {
 	FindAll(ctx context.Context) ([]*entity.OldKabkota, error)
-	BulkInsert(ctx context.Context, kabkota []*entity.NewKabkota) error
+	BulkInsert(ctx context.Context, kabkota []*entity.NewKabkota) (uint64, error)
 }
 
 func (k *KabKotaRepository) FindAll(ctx context.Context) ([]*entity.OldKabkota, error) {
@@ -40,32 +40,35 @@ func (k *KabKotaRepository) FindAll(ctx context.Context) ([]*entity.OldKabkota, 
 	return kabkota, nil
 }
 
-func (k *KabKotaRepository) BulkInsert(ctx context.Context, kabkota []*entity.NewKabkota) error {
+func (k *KabKotaRepository) BulkInsert(ctx context.Context, kabkota []*entity.NewKabkota) (uint64, error) {
 	ctxSpan, span := trace.StartSpan(ctx, "KabkotaRepository - BulkInsert")
 	defer span.End()
 
 	tx := k.db2.Begin()
 	if err := tx.Error; err != nil {
 		log.Println("ERROR: [KabKotaRepository - BulkInsert] Failed to start transaction:", err)
-		return err
+		return 0, err
 	}
+
+	count := uint64(len(kabkota))
 
 	for _, kk := range kabkota {
 		if err := tx.Debug().WithContext(ctxSpan).Create(kk).Error; err != nil {
+			count--
 			if gormErr := err.(*mysql.MySQLError); gormErr.Number == 1062 {
 				log.Printf("INFO: [KabKotaRepository - BulkInsert] Duplicate entry for id_wil: %s, skipping this entry\n", kk.IdWil)
 				continue
 			}
 			tx.Rollback()
 			log.Println("ERROR: [KabKotaRepository - BulkInsert] Failed to insert Kabkota data:", err)
-			return err
+			return 0, err
 		}
 	}
 
 	if err := tx.Commit().Error; err != nil {
 		log.Println("ERROR: [KabKotaRepository - BulkInsert] Failed to commit transaction:", err)
-		return err
+		return 0, err
 	}
 
-	return nil
+	return count, nil
 }

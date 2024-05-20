@@ -27,7 +27,7 @@ func NewPipelineHandler(config config.Config, pipelineService service.PipelineSe
 }
 
 func (ph *PipelineHandler) KabKotaPipeline(ctx context.Context, req *emptypb.Empty) (*pb.PipelineServiceResponse, error) {
-	err := ph.pipelineSvc.KabKotaPipeline(ctx)
+	rows, err := ph.pipelineSvc.KabKotaPipeline(ctx)
 	if err != nil {
 		parseError := errors.ParseError(err)
 		log.Println("ERROR: [PipelineHandler - KabKotaPipeline] Error while run KabKota pipeline: ", parseError.Message)
@@ -35,12 +35,14 @@ func (ph *PipelineHandler) KabKotaPipeline(ctx context.Context, req *emptypb.Emp
 		return &pb.PipelineServiceResponse{
 			Code:    uint32(http.StatusInternalServerError),
 			Message: parseError.Message,
+			Rows: 0,
 		}, status.Errorf(parseError.Code, parseError.Message)
 	}
 
 	return &pb.PipelineServiceResponse{
 		Code:    uint32(http.StatusOK),
 		Message: "Pipeline for KabKota has been successfully executed",
+		Rows: rows,
 	}, nil
 }
 
@@ -112,7 +114,7 @@ func (ph *PipelineHandler) SiakUpdateRespondenPipeline(ctx context.Context, req 
 
 	return &pb.PipelineServiceResponse{
 		Code:    uint32(http.StatusOK),
-		Message: "Pipeline for Siak Update Responden has been successfully executed",
+		Message: "Pipeline for Siak Update Responden has been successfully executed by 500 rows per batch",
 	}, nil
 }
 

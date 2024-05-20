@@ -13,7 +13,7 @@ const (
 
 type OldKabkota struct {
 	IdWil          string         `json:"id_wil"`
-	Nama           string         `json:"nama"`
+	NmWil          string         `json:"nm_wil"`
 	IdIndukWilayah string         `json:"id_induk_wilayah"`
 	CreatedAt      time.Time      `gorm:"type:timestamptz;not_null" json:"created_at"`
 	UpdatedAt      time.Time      `gorm:"type:timestamptz;not_null" json:"updated_at"`

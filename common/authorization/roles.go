@@ -14,66 +14,20 @@ type AccessibleRoles map[string]map[string][]uint32
 */
 
 const (
-	BasePath      = "tracer_study_grpc"
-	KabKotaSvc    = "KabKotaService"
-	MhsBiodataSvc = "MhsBiodataService"
-	PktsSvc       = "PKTSService"
-	ProvinsiSvc   = "ProvinsiService"
-	RespondenSvc  = "RespondenService"
-	UserStudySvc  = "UserStudyService"
-	ProdiSvc      = "ProdiService"
+	BasePath    = "tracer_study_grpc"
+	PipelineSvc = "PipelineService"
 )
 
 var roles = AccessibleRoles{
-	"/" + BasePath + "." + KabKotaSvc + "/": {
-		"GetAllKabKota":     {1, 2, 3, 4, 5, 6, 7},
-		"GetKabKotaByIdWil": {1, 2, 3, 4, 5, 6, 7},
-		"CreateKabKota":     {1, 2},
-		"UpdateKabKota":     {1, 2},
-		"DeleteKabKota":     {1, 2},
-	},
-	"/" + BasePath + "." + MhsBiodataSvc + "/": {
-		// "FetchMhsBiodataByNim": {1, 2, 3, 4, 5, 6},
-	},
-	"/" + BasePath + "." + PktsSvc + "/": {
-		"GetAllPKTS":          {1, 2, 3, 4, 5, 6, 7},
-		"GetPKTSByNim":        {1, 2, 3, 4, 5, 6, 7},
-		"CreatePKTS":          {1, 2, 5, 6},
-		"UpdatePKTS":          {1, 2, 5, 6},
-		"ExportPKTSReport":    {1, 2, 3, 4, 5},
-		"GetPKTSRekapByProdi": {1, 2, 3, 4, 5},
-		// "GetNimByDataAtasan":  {1, 2, 3, 4, 5, 6, 7},
-	},
-	"/" + BasePath + "." + ProdiSvc + "/": {
-		"GetAllProdi":    {1, 2, 3, 4, 5, 6, 7},
-		"GetAllFakultas": {1, 2, 3, 4, 5, 6, 7},
-		"GetProdiByKode": {1, 2, 3, 4, 5, 6, 7},
-		"CreateProdi":    {1, 2},
-		"UpdateProdi":    {1, 2},
-		"DeleteProdi":    {1, 2},
-	},
-	"/" + BasePath + "." + ProvinsiSvc + "/": {
-		"GetAllProvinsi":     {1, 2, 3, 4, 5, 6, 7},
-		"GetProvinsiByIdWil": {1, 2, 3, 4, 5, 6, 7},
-		"CreateProvinsi":     {1, 2},
-		"UpdateProvinsi":     {1, 2},
-		"DeleteProvinsi":     {1, 2},
-	},
-	"/" + BasePath + "." + RespondenSvc + "/": {
-		"GetAllResponden":         {1, 2, 3, 4, 5, 6, 7},
-		"GetRespondenByNim":       {1, 2, 3, 4, 5, 6, 7},
-		"UpdateRespondenFromSiak": {1, 2, 5, 6},
-		"CreateResponden":         {1, 2, 5, 6},
-		"UpdateResponden":         {1, 2, 5, 6},
-		"GetRespondenByNimList":   {1, 2, 3, 4, 5, 6, 7},
-	},
-	"/" + BasePath + "." + UserStudySvc + "/": {
-		"GetAllUserStudy":   {1, 2, 3, 4, 5, 6, 7},
-		"GetUserStudyByNim": {1, 2, 3, 4, 5, 6, 7},
-		"CreateUserStudy":   {1, 2, 7},
-		"UpdateUserStudy":   {1, 2, 7},
-		"ExportUSReport":    {1, 2, 3, 4, 5},
-	},
+	// "/" + BasePath + "." + PipelineSvc + "/": {
+	// 	"KabKotaPipeline":             {1, 2, 3, 4, 5},
+	// 	"ProvinsiPipeline":            {1, 2, 3, 4, 5},
+	// 	"ProdiPipeline":               {1, 2, 3, 4, 5},
+	// 	"UserStudyPipeline":           {1, 2, 3, 4, 5},
+	// 	"SiakUpdateRespondenPipeline": {1, 2, 3, 4, 5},
+	// 	"RespondenPipeline":           {1, 2, 3, 4, 5},
+	// 	"PKTSPipeline":                {1, 2, 3, 4, 5},
+	// },
 }
 
 func GetAccessibleRoles() map[string][]uint32 {
