@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package tracer_study_grpc;
+option go_package = "./;pb";
+
+import "google/protobuf/empty.proto";
+
+message PipelineServiceResponse {
+    string code = 1;
+    string message = 2;
+}
+
+service PipelineService {
+    rpc KabKotaPipeline(google.protobuf.Empty) returns (PipelineServiceResponse) {};
+    rpc ProvinsiPipeline(google.protobuf.Empty) returns (PipelineServiceResponse) {};
+    rpc ProdiPipeline(google.protobuf.Empty) returns (PipelineServiceResponse) {};
+    rpc UserStudyPipeline(google.protobuf.Empty) returns (PipelineServiceResponse) {};
+    rpc SiakUpdateRespondenPipeline(google.protobuf.Empty) returns (PipelineServiceResponse) {};
+    rpc RespondenPipeline(google.protobuf.Empty) returns (PipelineServiceResponse) {};
+    rpc PKTSPipeline(google.protobuf.Empty) returns (PipelineServiceResponse) {};
+}
