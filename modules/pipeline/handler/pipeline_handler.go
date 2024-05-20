@@ -87,7 +87,7 @@ func (ph *PipelineHandler) ProdiPipeline(ctx context.Context, req *emptypb.Empty
 }
 
 func (ph *PipelineHandler) UserStudyPipeline(ctx context.Context, req *emptypb.Empty) (*pb.PipelineServiceResponse, error) {
-	err := ph.pipelineSvc.UserStudyPipeline(ctx)
+	rows, err := ph.pipelineSvc.UserStudyPipeline(ctx)
 	if err != nil {
 		parseError := errors.ParseError(err)
 		log.Println("ERROR: [PipelineHandler - UserStudyPipeline] Error while run User Study pipeline: ", parseError.Message)
@@ -95,12 +95,14 @@ func (ph *PipelineHandler) UserStudyPipeline(ctx context.Context, req *emptypb.E
 		return &pb.PipelineServiceResponse{
 			Code:    uint32(http.StatusInternalServerError),
 			Message: parseError.Message,
+			Rows: 0,
 		}, status.Errorf(parseError.Code, parseError.Message)
 	}
 
 	return &pb.PipelineServiceResponse{
 		Code:    uint32(http.StatusOK),
 		Message: "Pipeline for User Study has been successfully executed",
+		Rows: rows,
 	}, nil
 }
 

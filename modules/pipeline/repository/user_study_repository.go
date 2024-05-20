@@ -24,7 +24,7 @@ func NewUserStudyRepository(db1, db2 *gorm.DB) *UserStudyRepository {
 type UserStudyRepositoryUseCase interface {
 	FindAll(ctx context.Context) ([]*entity.OldUserStudy, error)
 	CheckExist(ctx context.Context, emailResponden, hpResponden, nimLulusan string) (bool, error)
-	BulkInsert(ctx context.Context, userStudy []*entity.NewUserStudy) error
+	BulkInsert(ctx context.Context, userStudy []*entity.NewUserStudy) (uint64, error)
 }
 
 func (us *UserStudyRepository) FindAll(ctx context.Context) ([]*entity.OldUserStudy, error) {
@@ -40,41 +40,46 @@ func (us *UserStudyRepository) FindAll(ctx context.Context) ([]*entity.OldUserSt
 	return userStudy, nil
 }
 
-func (us *UserStudyRepository) BulkInsert(ctx context.Context, userStudy []*entity.NewUserStudy) error {
+func (us *UserStudyRepository) BulkInsert(ctx context.Context, userStudy []*entity.NewUserStudy) (uint64, error) {
 	ctxSpan, span := trace.StartSpan(ctx, "UserStudyRepository - BulkInsert")
 	defer span.End()
 
 	tx := us.db2.Begin()
 	if err := tx.Error; err != nil {
 		log.Println("ERROR: [UserStudyRepository - BulkInsert] Internal server error:", err)
-		return err
+		return 0, err
 	}
+
+	count := uint64(len(userStudy))
 
 	for _, u := range userStudy {
 		exist, err := us.CheckExist(ctx, u.EmailResponden, u.HpResponden, u.NimLulusan)
 		if err != nil {
+			count--
 			tx.Rollback()
 			log.Println("ERROR: [UserStudyRepository - BulkInsert] Internal server error:", err)
-			return err
+			return 0, err
 		}
 		if exist {
+			count--
 			log.Printf("INFO: [PktsRepository - BulkInsert] Data already exist for user  %s and lulusan %s, skipping this entry\n", u.EmailResponden, u.NimLulusan)
 			continue
 		}
 
 		if err := tx.Debug().WithContext(ctxSpan).Create(&u).Error; err != nil {
+			count--
 			tx.Rollback()
 			log.Println("ERROR: [UserStudyRepository - BulkInsert] Internal server error:", err)
-			return err
+			return 0, err
 		}
 	}
 
 	if err := tx.Commit().Error; err != nil {
 		log.Println("ERROR: [UserStudyRepository - BulkInsert] Internal server error:", err)
-		return err
+		return 0, err
 	}
 
-	return nil
+	return count, nil
 }
 
 func (us *UserStudyRepository) CheckExist(ctx context.Context, emailResponden, hpResponden, nimLulusan string) (bool, error) {

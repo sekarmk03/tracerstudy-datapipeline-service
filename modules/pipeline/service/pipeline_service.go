@@ -25,7 +25,7 @@ type PipelineServiceUseCase interface {
 	KabKotaPipeline(ctx context.Context) (uint64, error)
 	ProvinsiPipeline(ctx context.Context) (uint64, error)
 	ProdiPipeline(ctx context.Context) (uint64, error)
-	UserStudyPipeline(ctx context.Context) error
+	UserStudyPipeline(ctx context.Context) (uint64, error)
 	SiakUpdateRespondenPipeline(ctx context.Context) error
 	RespondenPipeline(ctx context.Context) (uint64, error)
 	PKTSPipeline(ctx context.Context) (uint64, error)
@@ -230,10 +230,10 @@ func (p *PipelineService) RespondenPipeline(ctx context.Context) (uint64, error)
 	return rows, nil
 }
 
-func (p *PipelineService) UserStudyPipeline(ctx context.Context) error {
+func (p *PipelineService) UserStudyPipeline(ctx context.Context) (uint64, error) {
 	userStudy, err := p.userStudyRepository.FindAll(ctx)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	var newUserStudy []*entity.NewUserStudy
@@ -268,11 +268,12 @@ func (p *PipelineService) UserStudyPipeline(ctx context.Context) error {
 		})
 	}
 
-	if err := p.userStudyRepository.BulkInsert(ctx, newUserStudy); err != nil {
-		return err
+	rows, err := p.userStudyRepository.BulkInsert(ctx, newUserStudy)
+	if err != nil {
+		return 0, err
 	}
 
-	return nil
+	return rows, nil
 }
 
 func (p *PipelineService) PKTSPipeline(ctx context.Context) (uint64, error) {
