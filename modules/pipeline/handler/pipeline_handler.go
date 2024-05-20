@@ -123,7 +123,7 @@ func (ph *PipelineHandler) SiakUpdateRespondenPipeline(ctx context.Context, req 
 }
 
 func (ph *PipelineHandler) RespondenPipeline(ctx context.Context, req *emptypb.Empty) (*pb.PipelineServiceResponse, error) {
-	err := ph.pipelineSvc.RespondenPipeline(ctx)
+	rows, err := ph.pipelineSvc.RespondenPipeline(ctx)
 	if err != nil {
 		parseError := errors.ParseError(err)
 		log.Println("ERROR: [PipelineHandler - RespondenPipeline] Error while run Responden pipeline: ", parseError.Message)
@@ -131,12 +131,14 @@ func (ph *PipelineHandler) RespondenPipeline(ctx context.Context, req *emptypb.E
 		return &pb.PipelineServiceResponse{
 			Code:    uint32(http.StatusInternalServerError),
 			Message: parseError.Message,
+			Rows: 0,
 		}, status.Errorf(parseError.Code, parseError.Message)
 	}
 
 	return &pb.PipelineServiceResponse{
 		Code:    uint32(http.StatusOK),
 		Message: "Pipeline for Responden has been successfully executed",
+		Rows: rows,
 	}, nil
 }
 

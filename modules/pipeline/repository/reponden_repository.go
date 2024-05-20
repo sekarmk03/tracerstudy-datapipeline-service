@@ -27,7 +27,7 @@ type RespondenRepositoryUseCase interface {
 	Update(ctx context.Context, nim string, responden *entity.OldResponden, updatedFields map[string]interface{}) error
 	UpdateStatusUpdate(ctx context.Context, statusFrom, statusTo string) error
 	FindAll(ctx context.Context) ([]*entity.OldResponden, error)
-	BulkInsert(ctx context.Context, responden []*entity.NewResponden) error
+	BulkInsert(ctx context.Context, responden []*entity.NewResponden) (uint64, error)
 }
 
 func (r *RespondenRepository) FindUnupdated(ctx context.Context) ([]*entity.OldResponden, error) {
@@ -80,32 +80,35 @@ func (r *RespondenRepository) FindAll(ctx context.Context) ([]*entity.OldRespond
 	return responden, nil
 }
 
-func (r *RespondenRepository) BulkInsert(ctx context.Context, responden []*entity.NewResponden) error {
+func (r *RespondenRepository) BulkInsert(ctx context.Context, responden []*entity.NewResponden) (uint64, error) {
 	ctxSpan, span := trace.StartSpan(ctx, "RespondenRepository - BulkInsert")
 	defer span.End()
 
 	tx := r.db2.Begin()
 	if err := tx.Error; err != nil {
 		log.Println("ERROR: [RespondenRepository - BulkInsert] Failed to start transaction:", err)
-		return err
+		return 0, err
 	}
+
+	count := uint64(len(responden))
 
 	for _, r := range responden {
 		if err := tx.Debug().WithContext(ctxSpan).Create(r).Error; err != nil {
+			count--
 			if gormErr := err.(*mysql.MySQLError); gormErr.Number == 1062 {
 				log.Printf("INFO: [RespondenRepository - BulkInsert] Duplicate entry for nim: %s, skipping this entry\n", r.Nim)
 				continue
 			}
 			tx.Rollback()
 			log.Println("ERROR: [RespondenRepository - BulkInsert] Failed to insert Responden data:", err)
-			return err
+			return 0, err
 		}
 	}
 
 	if err := tx.Commit().Error; err != nil {
 		log.Println("ERROR: [RespondenRepository - BulkInsert] Failed to commit transaction:", err)
-		return err
+		return 0, err
 	}
 
-	return nil
+	return count, nil
 }
