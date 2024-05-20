@@ -21,35 +21,32 @@ func main() {
 
 	splash(cfg)
 
-	// http.Handle("/images/", http.StripPrefix("/images/", http.FileServer(http.Dir("./public/uploads"))))
-	// log.Fatal(http.ListenAndServe(":8080", nil))
+	dsn1, derr1 := mysql.NewPool(cfg.MySQL1.User, cfg.MySQL1.Password, cfg.MySQL1.Host, cfg.MySQL1.Port, cfg.MySQL1.Name)
+	checkError(derr1)
 
-	dsn, derr := mysql.NewPool(&cfg.MySQL)
-	checkError(derr)
-	// errUtils.ConvertToRestError(derr)
+	db1, gerr1 := gormConn.NewMySQLGormDB(dsn1)
+	checkError(gerr1)
 
-	db, gerr := gormConn.NewMySQLGormDB(dsn)
-	checkError(gerr)
-	// errUtils.ConvertToRestError(gerr)
+	dsn2, derr2 := mysql.NewPool(cfg.MySQL2.User, cfg.MySQL2.Password, cfg.MySQL2.Host, cfg.MySQL2.Port, cfg.MySQL2.Name)
+	checkError(derr2)
+
+	db2, gerr2 := gormConn.NewMySQLGormDB(dsn2)
+	checkError(gerr2)
 
 	jwtManager := commonJwt.NewJWT(cfg.JWT.JwtSecretKey, cfg.JWT.TokenDuration)
 
 	grpcServer := server.NewGrpcServer(cfg.Port.GRPC, jwtManager)
 	grpcConn := server.InitGRPCConn(fmt.Sprintf("127.0.0.1:%v", cfg.Port.GRPC), false, "")
 
-	registerGrpcHandlers(grpcServer.Server, *cfg, db /*jwtManager,*/, grpcConn)
+	registerGrpcHandlers(grpcServer.Server, *cfg, db1, db2, grpcConn)
 
 	_ = grpcServer.Run()
 	_ = grpcServer.AwaitTermination()
 }
 
-func registerGrpcHandlers(server *grpc.Server, cfg config.Config, db *gorm.DB, grpcConn *grpc.ClientConn) {
-	pipelineModule.InitGrpc(server, cfg, db, grpcConn)
+func registerGrpcHandlers(server *grpc.Server, cfg config.Config, db1, db2 *gorm.DB, grpcConn *grpc.ClientConn) {
+	pipelineModule.InitGrpc(server, cfg, db1, db2, grpcConn)
 }
-
-// func createRestServer(port string) *server.Rest {
-// 	return server.NewRest(port)
-// }
 
 func checkError(err error) {
 	if err != nil {
@@ -74,6 +71,6 @@ func splash(cfg *config.Config) {
 	`, version)
 
 	// fmt.Println(colorBlue, fmt.Sprintf(`⇨ REST server started on port :%s`, cfg.Port.REST))
-	fmt.Println(colorCyan, fmt.Sprintf(`⇨ GRPC tracer service server started on port :%s`, cfg.Port.GRPC))
+	fmt.Println(colorCyan, fmt.Sprintf(`⇨ GRPC data pipeline service server started on port :%s`, cfg.Port.GRPC))
 	fmt.Println(colorReset, "")
 }

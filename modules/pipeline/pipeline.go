@@ -1,15 +1,15 @@
 package provinsi
 
 import (
-	"tracerstudy-tracer-service/common/config"
-	"tracerstudy-tracer-service/modules/provinsi/builder"
-	"tracerstudy-tracer-service/pb"
+	"tracerstudy-datapipeline-service/common/config"
+	"tracerstudy-datapipeline-service/modules/pipeline/builder"
+	"tracerstudy-datapipeline-service/pb"
 
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
 )
 
-func InitGrpc(server *grpc.Server, cfg config.Config, db *gorm.DB, grpcConn *grpc.ClientConn) {
-	provinsi := builder.BuildProvinsiHandler(cfg, db, grpcConn)
-	pb.RegisterProvinsiServiceServer(server, provinsi)
+func InitGrpc(server *grpc.Server, cfg config.Config, db1, db2 *gorm.DB, grpcConn *grpc.ClientConn) {
+	pipeline := builder.BuildPipelineHandler(cfg, db1, db2, grpcConn)
+	pb.RegisterPipelineServiceServer(server, pipeline)
 }
