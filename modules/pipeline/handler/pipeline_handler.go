@@ -161,7 +161,7 @@ func (ph *PipelineHandler) PKTSPipeline(ctx context.Context, req *emptypb.Empty)
 
 	return &pb.PipelineServiceResponse{
 		Code:    uint32(http.StatusOK),
-		Message: "Pipeline for PKTS has been successfully executed by 500 rows per batch",
+		Message: "Pipeline for PKTS has been successfully executed",
 		Rows:    rows,
 	}, nil
 }
