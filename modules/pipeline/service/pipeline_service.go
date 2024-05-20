@@ -28,7 +28,7 @@ type PipelineServiceUseCase interface {
 	UserStudyPipeline(ctx context.Context) error
 	SiakUpdateRespondenPipeline(ctx context.Context) error
 	RespondenPipeline(ctx context.Context) error
-	PKTSPipeline(ctx context.Context) error
+	PKTSPipeline(ctx context.Context) (uint64, error)
 }
 
 func NewPipelineService(
@@ -272,10 +272,10 @@ func (p *PipelineService) UserStudyPipeline(ctx context.Context) error {
 	return nil
 }
 
-func (p *PipelineService) PKTSPipeline(ctx context.Context) error {
+func (p *PipelineService) PKTSPipeline(ctx context.Context) (uint64, error) {
 	pkts, err := p.pktsRepository.FindAll(ctx)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	var newPkts []*entity.NewPkts
@@ -374,9 +374,10 @@ func (p *PipelineService) PKTSPipeline(ctx context.Context) error {
 		})
 	}
 
-	if err := p.pktsRepository.BulkInsert(ctx, newPkts); err != nil {
-		return err
+	rows, err := p.pktsRepository.BulkInsert(ctx, newPkts)
+	if err != nil {
+		return 0, err
 	}
 
-	return nil
+	return rows, nil
 }
