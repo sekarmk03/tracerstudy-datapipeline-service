@@ -211,7 +211,7 @@ func (p *PipelineService) RespondenPipeline(ctx context.Context) (uint64, error)
 			TahunMasuk:    rs.Thnmasuk,
 			LamaStudi:     uint32(utils.ConvStrToUint(rs.Lamastd, "lama_studi")),
 			KodeFakultas:  rs.Kodefak,
-			KodeProdi:     rs.Kodeprodi,
+			KodeProdi:     rs.Kodeprodi2,
 			JenisKelamin:  rs.JK,
 			Email:         rs.Email,
 			Hp:            utils.FormatPhoneNumber(rs.Hp),
